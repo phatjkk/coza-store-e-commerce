@@ -1,0 +1,61 @@
+﻿
+@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="container-fluid">
+
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Thông tin của khách hàng</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Số điện thoại</th>
+                                    <th scope="col">Tên khách hàng</th>
+                                    <th scope="col">Địa chỉ</th>
+                                    <th scope="col">Lần mua</th>
+                                    <th scope="col">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+                                    int count = 1;
+                                    foreach (KhachHang k in Common.getCustomer())
+                                    {
+
+                                        <tr role="row">
+                                            <td class="sorting_@(count)">@count</td>
+                                            <td>@k.soDT</td>
+                                            <td>@(k.tenKH)</td>
+                                            <td>@k.diaChi</td>
+                                            <td>@k.lanMua</td>
+                                            <td>@k.email</td>
+
+                                        </tr>
+                                        count++;
+                                    }
+
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--End Row-->
+    <!--start overlay-->
+    <div class="overlay toggle-menu"></div>
+    <!--end overlay-->
+
+</div>

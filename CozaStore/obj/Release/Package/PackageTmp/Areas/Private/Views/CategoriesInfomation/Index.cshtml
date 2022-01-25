@@ -1,0 +1,214 @@
+﻿@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="container-fluid">
+
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chủng loại hàng hoá - Ngành hàng</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="bangLoai" style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;" scope="col">Mã loại</th>
+                                    <th style="width: 35%;" scope="col">Tên loại hàng</th>
+                                    <th style="width: 10%;" scope="col">SL sản phẩm</th>
+                                    <th style="width: 40%;" scope="col">Nhóm lệnh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @{
+                                    foreach (LoaiSP k in Common.getCategories())
+                                    {
+
+                                        <tr role="row">
+                                            <td>@k.maLoai</td>
+                                            <td>@(k.tenLoai)</td>
+
+                                            <td>@Common.getProducts().Where(m => m.maLoai == k.maLoai).ToList().Count</td>
+
+                                            <td>
+
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="XoaLoai(@k.maLoai)">Xoá</button>
+
+                                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#suaLoai" onclick="chinhSua('@k.maLoai')">Chỉnh sửa</button>
+
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                }
+
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#themLoai">Thêm loại hàng</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!--start overlay-->
+    <div class="overlay toggle-menu"></div>
+    <!--end overlay-->
+
+</div>
+<script>
+    function XoaLoai(maLoai) {
+        if (confirm('Bạn có chắc muốn xoá mã loại '+maLoai+" từ database?")) {
+            $.get("/Private/API/XoaLoai", { maLoai: maLoai })
+                .done(function (data) {
+                    if (!data.includes("oke")) {
+                        alert("LỖI! Không thể xoá " + maLoai + " vì vi phạm ràng buộc toàn vẹn.");
+                    }
+                    else {
+                        alert("Xoá thành công!\n Mã:" + maLoai);
+
+                    }
+                    reload();
+                });
+        }
+    }
+    function reload() {
+        $("#bangLoai tbody").empty();
+        $("#bangLoai tbody").append('<tr role="row"><td>Loading..</td><td>Loading..</td><td>Loading..</td><td></td></tr>');
+        $.get("/Private/API/GetAllLoai")
+            .done(function (data) {
+                $("#bangLoai tbody").empty();
+
+                const loai = JSON.parse($("<textarea/>").html(data).val());
+                
+                loai.forEach(ThemDong);
+
+                function ThemDong(item) {
+                    let htmlNut = '<button type="button" class="btn btn-danger btn-sm" onclick="XoaLoai(\'' + item.maLoai +'\')">Xoá</button><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#suaLoai" onclick="chinhSua(\'' + item.maLoai +'\')">Chỉnh sửa</button>';
+                    $("#bangLoai tbody").append('<tr role="row"><td>' + item.maLoai + '</td><td>' + item.tenLoai + '</td><td>' + item.SL + '</td><td>' + htmlNut + '</td></tr>');
+
+                }
+                 });
+    }
+    function chinhSua(maLoai) {
+        document.getElementById("tenSua").value = "Loading...";
+        document.getElementById("maLoai").value = "Loading...";
+        document.getElementById("motaSua").value = "Loading...";
+        $.get("/Private/API/GetLoai", { maLoai: maLoai })
+            .done(function (data) {
+                const loai = JSON.parse($("<textarea/>").html(data).val());
+
+                document.getElementById("tenSua").value = loai.tenLoai;
+                document.getElementById("maLoai").value = loai.maLoai;
+                document.getElementById("motaSua").value = loai.moTa;
+
+            });
+    }
+    function Sua() {
+        let tenThem = document.getElementById("tenSua").value;
+        let maLoai = document.getElementById("maLoai").value;
+        let noidung = document.getElementById("motaSua").value;
+        if (confirm('Bạn có chắc muốn sửa mã loại ' + maLoai + " từ database?")) {
+            
+            $.get("/Private/API/SuaLoai", { maLoai: maLoai, tenThem: tenThem, noidung: noidung })
+                .done(function (data) {
+                    reload();
+                    $('#suaLoai').modal('toggle');
+                    alert("Lưu thành công!");
+                });
+        }
+    }
+    function Them() {
+        let tenThem = document.getElementById("tenThem").value;
+        let ma = 0;
+        let noidung = document.getElementById("noidung").value;
+        $.get("/Private/API/LuuLoai", {  maLoai: ma, tenThem: tenThem, noidung: noidung})
+            .done(function (data) {
+                alert("Thêm thành công: " + tenThem);
+                $('#themLoai').modal('toggle');
+                reload();
+            });
+    }
+</script>
+
+<div id="themLoai" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background-color: #4834d4">
+            <div class="modal-header">
+
+                <h5 class="modal-title">Thêm loại hàng</h5>
+            </div>
+            <div class="modal-body" style="color:#000000">
+                <div class="col-lg-12">
+
+                    <div class="form-group">
+                        <label for="tenThem">Tên loại hàng</label>
+                        @Html.TextBox("tenThem", "", new { @class = "form-control", @id = "tenThem", @placeholder = "Nhập tên bài viết" })
+                        @*<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Nhập tên bài viết">*@
+                    </div>
+
+                    <div class="form-group">
+                        <label for="noidung">Mô tả loại hàng</label>
+                        @Html.TextArea("noidung", "", new { @class = "form-control", @id = "noidung", @rows = "10", @placeholder = "Nhập nội dung..." })
+                        @*<textarea class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>*@
+                    </div>
+
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Huỷ</button>
+                <button type="button" class="btn btn-primary" onclick="Them()">Thêm loại hàng</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="suaLoai" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background-color: #4834d4">
+            <div class="modal-header">
+
+                <h5 class="modal-title">Sửa loại hàng</h5>
+            </div>
+            <div class="modal-body" style="color:#000000">
+                <div class="col-lg-12">
+
+                    <div class="form-group">
+                        <label for="tenSua">Tên loại hàng</label>
+                        @Html.TextBox("tenSua", "", new { @class = "form-control", @id = "tenSua", @placeholder = "Nhập tên bài viết" })
+                        @*<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Nhập tên bài viết">*@
+                    </div>
+                    <div class="form-group">
+                        <label for="maLoai">Mã loại hàng</label>
+                        @Html.TextBox("maLoai", "", new { @class = "form-control", @id = "maLoai", @placeholder = "Nhập tên bài viết" , @readonly = "readonly" })
+                        @*<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Nhập tên bài viết">*@
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Mô tả loại hàng</label>
+                        @Html.TextArea("motaSua", "", new { @class = "form-control", @rows = "10", @id = "motaSua", @placeholder = "Nhập nội dung..." })
+                        @*<textarea class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>*@
+                    </div>
+
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Huỷ</button>
+                <button type="button" class="btn btn-primary" onclick="Sua()">Lưu thay đổi</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

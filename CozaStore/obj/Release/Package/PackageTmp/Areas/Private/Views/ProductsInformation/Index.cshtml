@@ -1,0 +1,218 @@
+﻿
+@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+    List<LoaiSP> listLoai = Common.getCategories();
+    string nickAdmin = "";
+    if (((TaiKhoan)Session["ttAdmin"]) == null)
+    {
+        nickAdmin = "";
+    }
+    else
+    {
+        nickAdmin = ((TaiKhoan)Session["ttAdmin"]).taiKhoan1;
+    }
+}
+@{
+    if (ViewBag.Status != "")
+    {
+        <div class="alert alert-@(ViewBag.Status) alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <div class="alert-icon">
+                <i class="icon-info"></i>
+            </div>
+            <div class="alert-message">
+                <span><strong>Thông báo</strong> @ViewBag.Message</span>
+            </div>
+        </div>
+    }
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h4>Đăng sản phẩm mới</h4>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">Thông tin sản phẩm</li>
+
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+<section class="content">
+    <div class="container-fluid">
+        @using (Html.BeginForm("Index", "ProductsInformation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- general form elements disabled -->
+                    <div class="card card-gray">
+                        <div class="card-header">
+                            <h3 class="card-title">Hình minh hoạ cho sản phẩm</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+
+
+                                <img class="img-fluid pad" src="~/Image/anhjpg.jpg" id="imgShow" alt="Photo">
+                                <div class="form-group">
+                                    <label for="exampleInputFile">Tải lên ảnh</label>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            @Html.TextBox("file", "", new { type = "file", id = "exampleInputFile", @class = "custom-file-input", onchange = "readURL(this);" })
+                                            @*<input type="file" class="custom-file-input" id="exampleInputFile">*@
+                                            <label class="custom-file-label" for="exampleInputFile">Chọn file</label>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+
+
+
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                    <!-- general form elements disabled -->
+                    <!-- /.card -->
+                </div>
+                <!-- left column -->
+                <div class="col-md-6">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Thông tin chính</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Tên sản phẩm</label>
+                                    @Html.TextBox("tensp", "", new { @class = "form-control", @id = "exampleInputEmail1", @placeholder = "Nhập tên sản phẩm" })
+                                    @*<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Nhập tên bài viết">*@
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputPassword1">Nội dung tóm tắt</label>
+                                    @Html.TextArea("noidungsp", "", new { @class = "form-control", @row = "3", @placeholder = "Nhập nội dung..." })
+                                    @*<textarea class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>*@
+                                </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label>Giá bán</label>
+                                                @Html.TextBox("giasp", "", new { @class = "form-control", type = "text", @placeholder = "VND" })
+                                                @*<input type="text" class="form-control" placeholder="VND">*@
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Đơn vị tính</label>
+                                                <select class="form-control">
+                                                    <option>Cái</option>
+                                                    <option>Kg</option>
+                                                    <option>Lít</option>
+                                                </select>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Thông tin khuyến mãi</label>
+                                        @Html.TextBox("km", "", new { @class = "form-control", type = "text", @placeholder = "VD: 10%" })
+                                        @*<input type="text" class="form-control" placeholder="VD: 10%">*@
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label>Ngày đăng</label>
+                                                @Html.TextBox("ngaydang", DateTime.Now.ToString("dd/MM/yyyy"), new { @class = "form-control", @placeholder = "vd:12/04/2022", @readonly = "readonly" })
+                                                @*<input type="text" class="form-control" placeholder="VD: 12/02/2021">*@
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Người đăng</label>
+                                                @*<input type="text" class="form-control" placeholder="VD: 12/02/2021">*@
+                                                @Html.TextBox("userdang", nickAdmin, new { @class = "form-control", @placeholder = "Người đăng", @readonly = "readonly" })
+
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="row">
+                                            <!-- textarea -->
+                                            <div class="form-group" hidden>
+                                                <label>Kiểm duyệt sản phẩm</label>
+                                                <div class="custom-control custom-checkbox">
+                                                    @Html.CheckBox("duyet", false, new { @class = "custom-control-input", @type = "checkbox", @id = "customCheckbox1", @placeholder = "Người đăng" })
+                                                    @*<input class="custom-control-input" type="checkbox" id="customCheckbox1" value="option1">*@
+                                                    <label for="customCheckbox1" class="custom-control-label">Đã duyệt</label>
+                                                </div>
+                                            </div>
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Loại sản phẩm</label>
+                                              
+                                                <select name="loaisp" class = "form-control">
+                                                    @foreach (var item in listLoai)
+                                                    {
+                                                        <option value="@item.maLoai">@item.tenLoai</option>
+                                                    }
+                                                </select>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.card-body -->
+
+
+                            </div>
+
+                    </div>
+                </div>
+
+                <!--/.col (right) -->
+            </div>
+            <div class="container-full">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Giới thiệu chi tiết về sản phẩm</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+
+                        <div class="card-body pad">
+                            <div class="mb-3">
+                                @Html.TextArea("noidungspct", "", new { rows="5", @class = "textarea", id = "edithop", @placeholder = "Nhập nội dung...", @style = "width: 100%; height: 500px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" })
+
+                                @*<textarea class="textarea" id="edithop" placeholder="Place some text here"
+                                    style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>*@
+                            </div>
+
+                        </div>
+
+   
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">TẠO MỚI</button>
+                </div>
+            </div>
+            <!-- /.row -->
+        }
+    </div><!-- /.container-fluid -->
+</section>
+<script>
+    new FroalaEditor('#edithop');
+
+</script>

@@ -1,0 +1,9 @@
+﻿@using CozaStore.Models;
+@{
+    TaiKhoan x = (TaiKhoan)Session["ttAdmin"];
+    if (x == null)
+    {
+        Response.Redirect("/LoginAdmin");
+    }
+    Layout = "~/Areas/Private/Views/Shared/_Layout.cshtml";
+}

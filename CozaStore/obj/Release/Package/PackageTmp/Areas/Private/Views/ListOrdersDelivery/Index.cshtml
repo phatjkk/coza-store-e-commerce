@@ -1,0 +1,145 @@
+﻿@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+}
+
+<style>
+    #nut {
+        display: inline;
+    }
+</style>
+<div class="container-fluid">
+
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Danh sách các đơn hàng ĐANG GIAO</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Số đơn hàng</th>
+                                    <th scope="col">Tên khách hàng</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Địa chỉ</th>
+                                    <th scope="col">Thành Tiền</th>
+                                    <th scope="col">Nhóm lệnh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+
+                                    int tongTien = 0;
+                                    int count = 1;
+                                    List<CtDonHang> j = Common.getOrdersDetail();
+                                    foreach (DonHang k in Common.getOrders("2"))
+                                    {//Tinh tong tien
+                                        tongTien = 0;
+
+                                        foreach (CtDonHang ct in j)
+                                        {
+                                            if (ct.soDH == k.soDH)
+                                            {
+                                                tongTien += (int)ct.giaBan;
+                                            }
+
+                                        }
+                                        //chỗ này chưa làm
+                                        <tr>
+                                            <th scope="row">@(count)</th>
+                                            <td>@k.soDH</td>
+                                            <td>@k.KhachHang.tenKH</td>
+                                            <td>Đang giao</td>
+                                            <td>@k.diaChiGH</td>
+                                            @*<td>@j.ElementAt(count - 1).giaBan</td>*@
+                                        <td>@String.Format("{0:#,##0 đ}", tongTien)</td>
+                                            <td>
+                                                @using (Html.BeginForm("Delete", "ListOrdersDelivery", FormMethod.Post, new { id = "nut" }))
+                                                {
+                                                    <input type="hidden" name="soDH" value="@k.soDH" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xoá đơn hàng này: @k.soDH ?')">Huỷ đơn</button>
+                                                }
+
+                                                <button type="button" onclick="ChiTiet('@k.soDH')" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#chitietDon">Chi tiết</button>
+
+                                                @using (Html.BeginForm("Active", "ListOrdersDelivery", FormMethod.Post, new { id = "nut" }))
+                                                {
+                                                    <input type="hidden" name="soDH" value="@k.soDH" />
+                                                    <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc muốn xác nhận hoàn tất đơn này: @k.soDH ?')">Đã nhận hàng</button>
+                                                }
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+
+                                }
+
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--End Row-->
+    <!--start overlay-->
+    <div class="overlay toggle-menu"></div>
+    <!--end overlay-->
+
+</div>
+<script>
+    function ChiTiet(soDH){
+        $("#bangChiTiet tbody").empty();
+        $.get("/Private/ListOrders/GetOrderDetail", { soDH: soDH})
+            .done(function (data) {
+                $("#bangChiTiet tbody").empty();
+
+                const loai = JSON.parse($("<textarea/>").html(data).val());
+
+                loai.forEach(ThemDong);
+
+                function ThemDong(item) {
+                    $("#bangChiTiet tbody").append('<tr role="row"><td>' + item.maSP + '</td><td><img width="100" src="' + item.hinhDD + '" /></td><td>' + item.tenSP + '</td><td>' + item.sl + '</td><td>' + item.giaTien + '</td></tr>');
+
+                }
+            });
+    }
+</script>
+<div id="chitietDon" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="background-color: #4834d4">
+
+            <div class="row">
+
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Chi tiết đơn hàng</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="bangChiTiet">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Mã sản phẩm</th>
+                                            <th scope="col">Hình ảnh</th>
+                                            <th scope="col">Tên sản phẩm</th>
+                                            <th scope="col">Số lượng</th>
+                                            <th scope="col">Giá tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!--End Row-->
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>

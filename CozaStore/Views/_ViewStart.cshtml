@@ -1,0 +1,10 @@
+﻿
+@using CozaStore.Models;
+@{      
+    if (Session["ttKhach"] == null)
+    {
+        Session["ttKhach"] = new KhachSession();
+    }
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}

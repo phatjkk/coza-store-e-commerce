@@ -1,0 +1,262 @@
+﻿@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+}
+<style>
+    #nut {
+        display: inline;
+    }
+</style>
+@{
+    if (ViewBag.Status != "")
+    {
+        <div class="alert alert-@(ViewBag.Status) alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <div class="alert-icon">
+                <i class="icon-info"></i>
+            </div>
+            <div class="alert-message">
+                <span><strong>Thông báo</strong> @ViewBag.Message</span>
+            </div>
+        </div>
+    }
+}
+<div class="container-fluid">
+
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Danh sách các bài viết trong hệ thống</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Mã bài viết</th>
+                                    <th scope="col">Tên bài viết</th>
+                                    <th scope="col">Ngày đăng</th>
+                                    <th scope="col">Tài khoản</th>
+                                    <th scope="col">Số lần đọc</th>
+                                    <th scope="col">Nút lệnh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int count = 1;
+                                    foreach (BaiViet k in Common.getAllBlog())
+                                    {
+
+                                        <tr role="row">
+                                            <td class="sorting_@(count)">@k.maBV</td>
+                                            <td>@k.tenBV</td>
+                                            <td>@(k.ngayDang?.ToString("dd/MM/yyyy"))</td>
+
+                                            <td>@k.taiKhoan</td>
+
+                                            <td>@k.luotXem.ToString()</td>
+                                            <td>
+                                                @using (Html.BeginForm("Delete", "ListPost", FormMethod.Post, new { id = "nut" }))
+                                                {
+                                                    <input type="hidden" name="maBV" value="@k.maBV" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xoá bài viết: @k.tenBV?')">Xoá</button>
+                                                }
+                                                @{
+                                                    if (k.daDuyet == true)
+                                                    {
+                                                        using (Html.BeginForm("Inactive", "ListPost", FormMethod.Post, new { id = "nut" }))
+                                                        {
+                                                            <input type="hidden" name="maBV" value="@k.maBV" />
+                                                            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Bạn có chắc muốn vô hiệu bài viết: @k.tenBV ?')">Vô hiệu</button>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        using (Html.BeginForm("Inactive", "ListPost", FormMethod.Post, new { id = "nut" }))
+                                                        {
+                                                            <input type="hidden" name="maBV" value="@k.maBV" />
+                                                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc muốn kích hoạt bài viết: @k.tenBV ?')">Kích hoạt</button>
+                                                        }
+                                                    }
+                                                }
+                                                <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#suaBV" onclick="chinhSuaSP('@k.maBV')">Sửa</button>
+
+                                            </td>
+
+                                        </tr>
+                                        count++;
+                                    }
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--End Row-->
+    <!--start overlay-->
+    <div class="overlay toggle-menu"></div>
+    <!--end overlay-->
+
+</div>
+<script>
+
+    function chinhSuaSP(ma) {
+        $.get("/Private/API/LayBV", { maBV: ma })
+            .done(function (data) {
+                //const sp = JSON.parse($("<textarea/>").html(data).val());
+                data = data.replace(/\\n/g, "\\n")
+                    .replace(/\\'/g, "\\'")
+                    .replace(/\\"/g, '\\"')
+                    .replace(/\\&/g, "\\&")
+                    .replace(/\\r/g, "\\r")
+                    .replace(/\\t/g, "\\t")
+                    .replace(/\\b/g, "\\b")
+                    .replace(/\\f/g, "\\f");
+                // remove non-printable and other non-valid JSON chars
+                data = data.replace(/[\u0000-\u0019]+/g, "");
+                const bv = JSON.parse(data);
+
+                document.getElementById("maBV").value = bv.maBV;
+                document.getElementById("tenbv").value = bv.tenBV;
+                document.getElementById("noidungbv").value = bv.ndTomTat;
+                document.getElementById("loaitin").value = bv.loaiTin;
+                $("#noidungbvct")[0]["data-froala.editor"].html.set(bv.noiDung);
+
+                $("#imgShow").attr("src", bv.hinhDD);
+            });
+    }
+</script>
+<div id="suaBV" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="background-color: #4834d4">
+            @using (Html.BeginForm("Edit", "ListPost", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="modal-header">
+
+                    <h5 class="modal-title">Sửa bài viết</h5>
+                </div>
+                <div class="modal-body" style="color:#000000">
+
+                    <input type="text" hidden name="maBV" id="maBV" value="" />
+                    <div class="row">
+                        <!-- left column -->
+                        <div class="col-md-7">
+                            <!-- general form elements -->
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">Thông tin chính</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <!-- form start -->
+
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Tên bài viết</label>
+                                        @Html.TextBox("tenbv", "", new { @class = "form-control", @id = "tenbv", @placeholder = "Nhập tên bài viết" })
+                                        @*<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Nhập tên bài viết">*@
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputPassword1">Nội dung tóm tắt</label>
+                                        @Html.TextArea("noidungbv", "", new { @class = "form-control", @rows = "9", id = "noidungbv", @placeholder = "Nhập nội dung..." })
+                                        @*<textarea class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>*@
+                                    </div>
+
+
+                                    <div class="row">
+
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Loại tin</label>
+                                                @Html.TextBox("loaitin", "", new { @class = "form-control", @placeholder = "Kiến thức..." })
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- /.card-body -->
+
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <!-- general form elements disabled -->
+                            <div class="card card-warning">
+                                <div class="card-header">
+                                    <h3 class="card-title">Hình đại diện</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+
+
+                                    <img class="img-fluid pad" src="~/Image/blog-01.jpg" width="100%" id="imgShow" alt="Photo">
+                                    <div class="form-group">
+                                        <label for="exampleInputFile">Tải lên ảnh</label>
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                @Html.TextBox("file", "", new { type = "file", id = "exampleInputFile", @class = "custom-file-input", onchange = "readURL(this);" })
+                                                @*<input type="file" class="custom-file-input" id="exampleInputFile">*@
+                                                <label class="custom-file-label" for="exampleInputFile">Chọn file</label>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.card -->
+                            <!-- general form elements disabled -->
+                            <!-- /.card -->
+                        </div>
+                        <!--/.col (right) -->
+                    </div>
+                    <div class="container-full">
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">Nội dung chính</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+
+                            <div class="card-body pad">
+                                <div class="mb-3">
+                                    @Html.TextArea("noidungbvct", "", new { @class = "textarea", @rows = "10", id = "noidungbvct", @placeholder = "Nhập nội dung...", @style = "width: 100%; height: 500px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" })
+                                    @*<textarea class="textarea" id="edithop" placeholder="Place some text here"
+                                        style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>*@
+                                </div>
+                                <p class="text-sm mb-0">
+
+
+                                </p>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <!-- /.row -->
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('Bạn có chắc muốn sửa bài viết này?')">Lưu thay đổi</button>
+                </div>
+            }
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<script>
+    new FroalaEditor('#noidungbvct');
+
+</script>

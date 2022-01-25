@@ -1,0 +1,387 @@
+﻿@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+    //Lấy sl đơn hàng
+    int sldonhang = Common.getOrders().Count();
+    //Lấy tổng tiền đơn hàng thành công làm doanh thu
+    int doanhthu = 0;
+    foreach (DonHang don in Common.getOrders("3"))
+    {
+        doanhthu += (int)Common.getOrdersDetail().Where(m => m.soDH == don.soDH).Sum(m => m.giaBan);
+    }
+    //Lấy sl khách hàng
+    int slkhachhang = Common.getCustomer().Count();
+    //Lấy sl sản phẩm
+    int slsp = Common.getAllProducts().Count;
+    ////Lấy danh sách sản phẩm bán chạy
+    var listSPbanChay = Common.getOrdersDetail().GroupBy(x => x.SanPham.maLoai)
+            .Select(x => new
+            {
+                Count = x.Count(),
+                ID = x.First().SanPham.maLoai
+            })
+            .OrderByDescending(x => x.Count).ToList();
+
+    //var list = new List<string> { "a", "b", "a", "c", "a", "b" };
+    //var q = from x in list
+    //        group x by x into g
+    //        let count = g.Count()
+    //        orderby count descending
+    //        select new { Value = g.Key, Count = count };
+}
+<div class="container-fluid">
+
+    <!--Start Dashboard Content-->
+
+    <div class="card mt-3">
+        <div class="card-content">
+            <div class="row row-group m-0">
+                <div class="col-12 col-lg-6 col-xl-3 border-light">
+                    <div class="card-body">
+                        <h5 class="text-white mb-0">@sldonhang <span class="float-right"><i class="fa fa-shopping-cart"></i></span></h5>
+                        <div class="progress my-3" style="height:3px;">
+                            <div class="progress-bar" style="width:55%"></div>
+                        </div>
+                        <p class="mb-0 text-white small-font">Tổng Đơn Hàng<span class="float-right">+4.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6 col-xl-3 border-light">
+                    <div class="card-body">
+                        <h5 class="text-white mb-0">@String.Format("{0:#,##0 đ}", doanhthu) <span class="float-right"><i class="fa fa-usd"></i></span></h5>
+                        <div class="progress my-3" style="height:3px;">
+                            <div class="progress-bar" style="width:55%"></div>
+                        </div>
+                        <p class="mb-0 text-white small-font">Tổng Doanh Thu<span class="float-right">+1.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6 col-xl-3 border-light">
+                    <div class="card-body">
+                        <h5 class="text-white mb-0">@slkhachhang <span class="float-right"><i class="fa fa-eye"></i></span></h5>
+                        <div class="progress my-3" style="height:3px;">
+                            <div class="progress-bar" style="width:55%"></div>
+                        </div>
+                        <p class="mb-0 text-white small-font">Khách Hàng <span class="float-right">+5.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6 col-xl-3 border-light">
+                    <div class="card-body">
+                        <h5 class="text-white mb-0">@slsp <span class="float-right"><i class="fa fa-envira"></i></span></h5>
+                        <div class="progress my-3" style="height:3px;">
+                            <div class="progress-bar" style="width:55%"></div>
+                        </div>
+                        <p class="mb-0 text-white small-font">Sản phẩm hiện có <span class="float-right">+2.2% <i class="zmdi zmdi-long-arrow-up"></i></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-8 col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    Lưu lượng truy cập (Undone)
+                    <div class="card-action">
+                        <div class="dropdown">
+                            <a href="javascript:void();" class="dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown">
+                                <i class="icon-options"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="javascript:void();">Action</a>
+                                <a class="dropdown-item" href="javascript:void();">Another action</a>
+                                <a class="dropdown-item" href="javascript:void();">Something else here</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="javascript:void();">Separated link</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-inline">
+                        <li class="list-inline-item"><i class="fa fa-circle mr-2 text-white"></i>Khách hàng mới</li>
+                        <li class="list-inline-item"><i class="fa fa-circle mr-2 text-light"></i>Khách hàng cũ</li>
+                    </ul>
+                    <div class="chart-container-1">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                </div>
+
+                <div class="row m-0 row-group text-center border-top border-light-3">
+                    <div class="col-12 col-lg-4">
+                        <div class="p-3">
+                            <h5 class="mb-0">45.87M</h5>
+                            <small class="mb-0">Tổng lưu lượng <span> <i class="fa fa-arrow-up"></i> 2.43%</span></small>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="p-3">
+                            <h5 class="mb-0">15:48</h5>
+                            <small class="mb-0">Thời gian trung bình <span> <i class="fa fa-arrow-up"></i> 12.65%</span></small>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="p-3">
+                            <h5 class="mb-0">245.65</h5>
+                            <small class="mb-0">Truy cập Page <span> <i class="fa fa-arrow-up"></i> 5.62%</span></small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4 col-xl-4">
+            <div class="card">
+                <div class="card-header">
+                    Sản phẩm bán chạy
+                    <div class="card-action">
+                        <div class="dropdown">
+                            <a href="javascript:void();" class="dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown">
+                                <i class="icon-options"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="javascript:void();">Action</a>
+                                <a class="dropdown-item" href="javascript:void();">Another action</a>
+                                <a class="dropdown-item" href="javascript:void();">Something else here</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="javascript:void();">Separated link</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container-2">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-items-center">
+                        <tbody>
+                            @foreach (var a in listSPbanChay)
+                            {
+                                <tr>
+                                    <td><i class="fa fa-circle text-white mr-2"></i> @Common.getCategories().Where(m=>m.maLoai==a.ID).First().tenLoai</td>
+                                    <td>@a.Count đã bán</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div><!--End Row-->
+
+    <div class="row">
+        <div class="col-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    Đơn Hàng Mới Đang Chờ Xử Lý
+                    <div class="card-action">
+                        <div class="dropdown">
+                            <a href="javascript:void();" class="dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown">
+                                <i class="icon-options"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="javascript:void();">Action</a>
+                                <a class="dropdown-item" href="javascript:void();">Another action</a>
+                                <a class="dropdown-item" href="javascript:void();">Something else here</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="javascript:void();">Separated link</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-items-center table-flush table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Tên khách</th>
+                                <th>Ngày đặt</th>
+                                <th>Địa chỉ</th>
+                                <th>Giá trị đơn hàng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+
+                                int tongTien = 0;
+                                List<CtDonHang> j = Common.getOrdersDetail();
+                                foreach (DonHang k in Common.getOrders("0"))
+                                {
+                                    //Tinh tong tien
+                                    tongTien = 0;
+
+                                    foreach (CtDonHang ct in j)
+                                    {
+                                        if (ct.soDH == k.soDH)
+                                        {
+                                            tongTien += (int)ct.giaBan;
+                                        }
+
+                                    }
+                                    //chỗ này chưa làm
+                                    string formatted = k.ngayDat?.ToString("dd/MM/yyyy");
+                                    <tr>
+                                        <td>@k.soDH</td>
+                                        <td>@k.KhachHang.tenKH</td>
+                                        <td>@formatted</td>
+                                        <td>@k.diaChiGH</td>
+                                        <td>@String.Format("{0:#,##0 đ}", tongTien)</td>
+                                        
+                                    </tr>
+
+                                }
+
+
+
+}
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div><!--End Row-->
+    <!--End Dashboard Content-->
+    <!--start overlay-->
+    <div class="overlay toggle-menu"></div>
+    <!--end overlay-->
+
+</div>
+<!-- End container-fluid-->
+<script>
+    $(function () {
+        "use strict";
+
+        // chart 1
+
+        var ctx = document.getElementById('chart1').getContext('2d');
+
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+                datasets: [{
+                    label: 'New Visitor',
+                    data: [3, 3, 8, 5, 7, 4, 6, 4, 6, 3],
+                    backgroundColor: '#fff',
+                    borderColor: "transparent",
+                    pointRadius: "0",
+                    borderWidth: 3
+                }, {
+                    label: 'Old Visitor',
+                    data: [7, 5, 14, 7, 12, 6, 10, 6, 11, 5],
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    borderColor: "transparent",
+                    pointRadius: "0",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                legend: {
+                    display: false,
+                    labels: {
+                        fontColor: '#ddd',
+                        boxWidth: 40
+                    }
+                },
+                tooltips: {
+                    displayColors: false
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            fontColor: '#ddd'
+                        },
+                        gridLines: {
+                            display: true,
+                            color: "rgba(221, 221, 221, 0.08)"
+                        },
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            fontColor: '#ddd'
+                        },
+                        gridLines: {
+                            display: true,
+                            color: "rgba(221, 221, 221, 0.08)"
+                        },
+                    }]
+                }
+
+            }
+        });
+
+
+        // chart 2
+
+        var ctx = document.getElementById("chart2").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    @{
+                        foreach (var a in listSPbanChay)
+                                    {
+                                        if (listSPbanChay.IndexOf(a) == listSPbanChay.Count - 1)
+                                        {
+                                            @Html.Raw("\""+Common.getCategories().Where(m=>m.maLoai== a.ID).First().tenLoai +"\"")
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw("\""+ Common.getCategories().Where(m => m.maLoai == a.ID).First().tenLoai + "\",")
+                                        }
+                        }
+                       }
+                ],
+                datasets: [{
+                    backgroundColor: [
+                        "#ffffff",
+                        "rgba(255, 255, 255, 0.70)",
+                        "rgba(255, 255, 255, 0.50)",
+                        "rgba(255, 255, 255, 0.20)"
+                    ],
+                    data: [@foreach (var a in listSPbanChay)
+                    {
+                        if (listSPbanChay.IndexOf(a) == listSPbanChay.Count - 1)
+                        {
+                            @Html.Raw(a.Count)
+                        }
+                        else
+                        {
+                            @Html.Raw(a.Count + ",")
+                        }
+                    }],
+                    borderWidth: [0, 0, 0, 0]
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                legend: {
+                    position: "bottom",
+                    display: false,
+                    labels: {
+                        fontColor: '#ddd',
+                        boxWidth: 15
+                    }
+                }
+                ,
+                tooltips: {
+                    displayColors: false
+                }
+            }
+        });
+
+
+
+
+    });
+
+</script>

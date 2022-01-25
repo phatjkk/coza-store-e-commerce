@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="e9d2c7fd58de4e3ba0b628a00cde7e85" Name="Diagram1" ZoomLevel="83">
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.BaiViet" Width="1.5" PointX="3" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.CtDonHang" Width="1.5" PointX="8.25" PointY="4.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.DonHang" Width="1.5" PointX="6" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.KhachHang" Width="1.5" PointX="3.75" PointY="9.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.LoaiSP" Width="1.5" PointX="3.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.SanPham" Width="1.5" PointX="6" PointY="3.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.sysdiagram" Width="1.5" PointX="0.75" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ShopOnline_DemoEntities.TaiKhoan" Width="1.5" PointX="0.75" PointY="3.875" IsExpanded="true" />
+        <AssociationConnector Association="ShopOnline_DemoEntities.FK__BaiViet__taiKhoa__2C3393D0" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopOnline_DemoEntities.FK__CtDonHang__maSP__44FF419A" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopOnline_DemoEntities.FK__CtDonHang__soDH__440B1D61" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopOnline_DemoEntities.FK__DonHang__maKH__3F466844" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopOnline_DemoEntities.FK__SanPham__maLoai__34C8D9D1" ManuallyRouted="false" />
+        <AssociationConnector Association="ShopOnline_DemoEntities.FK__SanPham__taiKhoa__36B12243" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

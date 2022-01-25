@@ -1,0 +1,289 @@
+﻿@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+}
+
+@{
+    if (ViewBag.MaDH != "")
+    {
+        <script>
+            function codeAddress() {
+                swal('Đặt hàng thành công', "Đơn hàng của bạn đã được tiếp nhận. Mã đơn hàng: @(ViewBag.MaDH)", "success").then(function () {
+                    window.location = "/Home";
+                });
+
+            }
+            window.onload = codeAddress;
+        </script>
+    }
+    else
+    {
+        <div class="container">
+            <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+                <a href="@Url.Action("Index","Home")" class="stext-109 cl8 hov-cl1 trans-04">
+                    Trang chủ
+                    <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+                </a>
+
+                <span class="stext-109 cl4">
+                    Thanh toán
+                </span>
+            </div>
+        </div>
+        using (Html.BeginForm("CheckOut", "CheckOut", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return DatHang();" }))
+        {
+            <!-- Shoping Cart -->
+            <div class="bg0 p-t-75 p-b-85">
+
+                <div class="col-lg-10 col-xl-7 m-lr-auto m-b-10">
+                    <div class="form-group">
+
+                        <h3>Xác nhận đơn hàng</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="tenkh">Họ và tên:</label>
+                        <input type="text" class="form-control" id="tenkh" name="tenkh">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Địa chỉ email:</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="sdt">Số điện thoại:</label>
+                        <input type="text" class="form-control" id="sdt" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Địa chỉ giao hàng:</label>
+                        <input type="text" class="form-control" id="diachi" name="diachi" placeholder="Số nhà, đường, ấp/phường/xã">
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <select class="form-control" name="calc_shipping_provinces" required="">
+                                <option value="">Tỉnh / Thành phố</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <select class="form-control" name="calc_shipping_district" required="">
+                                <option value="">Quận / Huyện</option>
+                            </select>
+                            <input class="billing_address_1" name="city" id="city" type="hidden" value="">
+                            <input class="billing_address_2" name="district" id="district" type="hidden" value="">
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+            <!-- Shoping Cart -->
+            <div class="bg0 p-t-10 p-b-85">
+
+                <div class="container">
+                    <div class="row">
+
+                        <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
+                            <div class="m-l-25 m-r--38 m-lr-0-xl">
+
+                                <div class="wrap-table-shopping-cart">
+
+                                    <table class="table-shopping-cart">
+                                        <tr class="table_head">
+                                            <th class="column-1">Sản phẩm</th>
+                                            <th class="column-2"></th>
+                                            <th class="column-3">Giá tiền</th>
+                                            <th class="column-4">Số lượng</th>
+                                            <th class="column-5">Tổng tiền</th>
+                                        </tr>
+
+                                        @{
+                                            int tongTien = 0;
+                                            int sl;
+                                            foreach (SanPham k in ((KhachSession)Session["ttKhach"]).gioHang)
+                                            {
+
+                                                sl = ((KhachSession)Session["ttKhach"]).listSLSP.Where(m => m.masp == k.maSP).ToList().First().sl;
+
+
+
+                                                <tr class="table_row" id="mathang@(@k.maSP)">
+                                                    <td class="column-1">
+                                                        <div class="how-itemcart1">
+                                                            <img src="@k.hinhDD" alt="IMG">
+                                                        </div>
+                                                    </td>
+                                                    <td class="column-2">@k.tenSP</td>
+                                                    <td class="column-3">@String.Format("{0:#,##0 đ}", k.giaBan)</td>
+                                                    <td class="column-4">
+                                                        @sl
+
+                                                    </td>
+                                                    <td class="column-5">@String.Format("{0:#,##0 đ}", (k.giaBan * sl))</td>
+                                                </tr>
+                                                tongTien += ((int)k.giaBan * sl);
+                                            }
+                                        }
+
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
+                            <div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
+                                <h4 class="mtext-109 cl2 p-b-30">
+                                    Xác nhận mua hàng
+                                </h4>
+
+                                <div class="flex-w flex-t bor12 p-b-13">
+                                    <div class="size-208">
+                                        <span class="stext-110 cl2">
+                                            Tiền hàng:
+                                        </span>
+                                    </div>
+
+                                    <div class="size-209">
+                                        <span class="mtext-110 cl2">
+                                            @String.Format("{0:#,##0 đ}", (tongTien))
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="flex-w flex-t bor12 p-t-15 p-b-30">
+                                    <div class="size-208 w-full-ssm">
+                                        <span class="stext-110 cl2">
+                                            Phí vận chuyển:
+                                        </span>
+                                    </div>
+
+                                    <div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
+                                        <p class="stext-111 cl6 p-t-2">
+                                            Freeship toàn quốc
+                                        </p>
+
+                                    </div>
+                                </div>
+
+                                <div class="flex-w flex-t p-t-27 p-b-33">
+                                    <div class="size-208">
+                                        <span class="mtext-101 cl2">
+                                            Tổng:
+                                        </span>
+                                    </div>
+
+                                    <div class="size-209 p-t-1">
+                                        <span class="mtext-110 cl2">
+                                            @String.Format("{0:#,##0 đ}", (tongTien))
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer js-order-detail">
+                                    ĐẶT HÀNG NGAY
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+
+}
+<!-- breadcrumb -->
+
+<script>
+    function DatHang() {
+        if (CheckFill() === true) {
+            return true;
+        }
+        else {
+            swal('LỖI', "Vui lòng điền đầy đủ thông tin của bạn", "error");
+            return false;
+        }
+    }
+    function CheckFill() {
+        let name = document.getElementById("tenkh").value;
+        let email = document.getElementById("email").value;
+        let sdt = document.getElementById("sdt").value;
+        let diachi = document.getElementById("diachi").value;
+        let district = document.getElementById("district").value;
+        let city = document.getElementById("city").value;
+        if (name !== "" && email !== "" && sdt !== "" && diachi !== "" && district !== "") {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    if (address_2 = localStorage.getItem('address_2_saved')) {
+        $('select[name="calc_shipping_district"] option').each(function () {
+            if ($(this).text() == address_2) {
+                $(this).attr('selected', '')
+            }
+        })
+        $('input.billing_address_2').attr('value', address_2)
+    }
+    if (district = localStorage.getItem('district')) {
+        $('select[name="calc_shipping_district"]').html(district)
+        $('select[name="calc_shipping_district"]').on('change', function () {
+            var target = $(this).children('option:selected')
+            target.attr('selected', '')
+            $('select[name="calc_shipping_district"] option').not(target).removeAttr('selected')
+            address_2 = target.text()
+            $('input.billing_address_2').attr('value', address_2)
+            district = $('select[name="calc_shipping_district"]').html()
+            localStorage.setItem('district', district)
+            localStorage.setItem('address_2_saved', address_2)
+        })
+    }
+    $('select[name="calc_shipping_provinces"]').each(function () {
+        var $this = $(this),
+            stc = ''
+        c.forEach(function (i, e) {
+            e += +1
+            stc += '<option value=' + e + '>' + i + '</option>'
+            $this.html('<option value="">Tỉnh / Thành phố</option>' + stc)
+            if (address_1 = localStorage.getItem('address_1_saved')) {
+                $('select[name="calc_shipping_provinces"] option').each(function () {
+                    if ($(this).text() == address_1) {
+                        $(this).attr('selected', '')
+                    }
+                })
+                $('input.billing_address_1').attr('value', address_1)
+            }
+            $this.on('change', function (i) {
+                i = $this.children('option:selected').index() - 1
+                var str = '',
+                    r = $this.val()
+                if (r != '') {
+                    arr[i].forEach(function (el) {
+                        str += '<option value="' + el + '">' + el + '</option>'
+                        $('select[name="calc_shipping_district"]').html('<option value="">Quận / Huyện</option>' + str)
+                    })
+                    var address_1 = $this.children('option:selected').text()
+                    var district = $('select[name="calc_shipping_district"]').html()
+                    localStorage.setItem('address_1_saved', address_1)
+                    localStorage.setItem('district', district)
+                    $('select[name="calc_shipping_district"]').on('change', function () {
+                        var target = $(this).children('option:selected')
+                        target.attr('selected', '')
+                        $('select[name="calc_shipping_district"] option').not(target).removeAttr('selected')
+                        var address_2 = target.text()
+                        $('input.billing_address_2').attr('value', address_2)
+                        district = $('select[name="calc_shipping_district"]').html()
+                        localStorage.setItem('district', district)
+                        localStorage.setItem('address_2_saved', address_2)
+                    })
+                } else {
+                    $('select[name="calc_shipping_district"]').html('<option value="">Quận / Huyện</option>')
+                    district = $('select[name="calc_shipping_district"]').html()
+                    localStorage.setItem('district', district)
+                    localStorage.removeItem('address_1_saved', address_1)
+                }
+            })
+        })
+    })
+</script>

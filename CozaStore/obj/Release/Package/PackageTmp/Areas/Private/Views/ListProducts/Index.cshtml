@@ -1,0 +1,309 @@
+﻿@using CozaStore.Models;
+@{
+    ViewBag.Title = "Index";
+    List<LoaiSP> listLoai = Common.getCategories();
+    string nickAdmin = "";
+    if (((TaiKhoan)Session["ttAdmin"]) == null)
+    {
+        nickAdmin = "";
+    }
+    else
+    {
+        nickAdmin = ((TaiKhoan)Session["ttAdmin"]).taiKhoan1;
+    }
+}
+<style>
+    #nut {
+        display: inline;
+    }
+</style>
+<div class="container-fluid">
+
+
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Danh sách các đơn hàng</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Mã sản phẩm</th>
+                                    <th scope="col">Hình ảnh</th>
+                                    <th scope="col">Tên sản phẩm</th>
+                                    <th scope="col">Mã loại</th>
+                                    <th scope="col">Giá tiền</th>
+                                    <th scope="col">Nhóm lệnh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+
+                                    int count = 1;
+                                    foreach (SanPham k in Common.getAllProducts())
+                                    {
+                                        <tr>
+                                            <th scope="row">@(k.maSP)</th>
+                                            <td>
+                                                <img width="100" src="@k.hinhDD" />
+                                            </td>
+                                            <td>@k.tenSP</td>
+                                            <td>@k.maLoai</td>
+                                            <td>@String.Format("{0:#,##0 đ}", k.giaBan)</td>
+                                            <td>
+                                                @using (Html.BeginForm("Delete", "ListProducts", FormMethod.Post, new { id = "nut" }))
+                                                {
+                                                    <input type="hidden" name="maSP" value="@k.maSP" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xoá sản phẩm: @k.tenSP ?')">Xoá</button>
+                                                }
+
+                                                @{
+                                                    if (k.daDuyet == true)
+                                                    {
+                                                        using (Html.BeginForm("Inactive", "ListProducts", FormMethod.Post, new { id = "nut" }))
+                                                        {
+                                                            <input type="hidden" name="maSP" value="@k.maSP" />
+                                                            <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Bạn có chắc muốn vô hiệu sản phẩm: @k.tenSP ?')">Vô hiệu</button>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        using (Html.BeginForm("Inactive", "ListProducts", FormMethod.Post, new { id = "nut" }))
+                                                        {
+                                                            <input type="hidden" name="maSP" value="@k.maSP" />
+                                                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc muốn kích hoạt sản phẩm: @k.tenSP ?')">Kích hoạt</button>
+                                                        }
+                                                    }
+                                                }
+
+
+                                                @*@using (Html.BeginForm("Edit", "ListProducts", FormMethod.Post, new { id = "nut" }))
+                                                    {
+                                                        <input type="hidden" name="maSP" value="@k.maSP" />
+                                                        <button type="submit" class="btn btn-success btn-sm">Sửa</button>
+                                                    }*@
+
+                                                <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#suaSP" onclick="chinhSuaSP('@k.maSP')">Sửa</button>
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+
+                                }
+
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--End Row-->
+    <!--start overlay-->
+    <div class="overlay toggle-menu"></div>
+    <!--end overlay-->
+
+</div>
+<script>
+    function htmlDecode(value) {
+        return $("<textarea/>").html(value).text();
+    }
+    function chinhSuaSP(maSP) {
+        $.get("/Private/API/LaySP", { maSP: maSP })
+            .done(function (data) {
+                //const sp = JSON.parse($("<textarea/>").html(data).val());
+                data = data.replace(/\\n/g, "\\n")
+                    .replace(/\\'/g, "\\'")
+                    .replace(/\\"/g, '\\"')
+                    .replace(/\\&/g, "\\&")
+                    .replace(/\\r/g, "\\r")
+                    .replace(/\\t/g, "\\t")
+                    .replace(/\\b/g, "\\b")
+                    .replace(/\\f/g, "\\f");
+                // remove non-printable and other non-valid JSON chars
+                data = data.replace(/[\u0000-\u0019]+/g, "");
+                const sp = JSON.parse(data);
+                $("#imgShow").attr("src", sp.hinhDD);
+
+                document.getElementById("maSP").value = sp.maSP;
+                document.getElementById("tensp").value = sp.tenSP;
+                document.getElementById("noidungsp").value = sp.ndTomTat;
+                document.getElementById("giasp").value = sp.giaBan;
+                document.getElementById("km").value = sp.giamGia;
+                $("#duyet").prop("checked", sp.daDuyet=="True"?true:false);
+                document.getElementById("loaisp").value = sp.maLoai;
+                
+                $("#noidungspct")[0]["data-froala.editor"].html.set(htmlDecode(sp.noiDung));
+                
+            });
+    }
+</script>
+
+<div id="suaSP" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" style="background-color: #4834d4">
+            @using (Html.BeginForm("Edit", "ListProducts", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="modal-header">
+
+                    <h5 class="modal-title">Sửa loại hàng</h5>
+                </div>
+                <div class="modal-body" style="color:#000000">
+
+                    <input type="text" hidden name="maSP" id="maSP" value="" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- general form elements disabled -->
+                            <div class="card card-gray">
+                                <div class="card-header">
+                                    <h3 class="card-title">Hình minh hoạ cho sản phẩm</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+
+
+                                    <img class="img-fluid pad" id="imgShow" alt="Photo">
+                                    <div class="form-group">
+                                        <label for="exampleInputFile">Tải lên ảnh</label>
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                @Html.TextBox("file", "", new { type = "file", id = "file", @class = "custom-file-input", onchange = "readURL(this);" })
+                                                @*<input type="file" class="custom-file-input" id="exampleInputFile">*@
+                                                <label class="custom-file-label" for="exampleInputFile">Chọn file</label>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.card -->
+                            <!-- general form elements disabled -->
+                            <!-- /.card -->
+                        </div>
+                        <!-- left column -->
+                        <div class="col-md-6">
+                            <!-- general form elements -->
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">Thông tin chính</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <!-- form start -->
+
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="tensp">Tên sản phẩm</label>
+                                        @Html.TextBox("tensp", "", new { @class = "form-control", @id = "tensp", @placeholder = "Nhập tên sản phẩm" })
+                                        @*<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Nhập tên bài viết">*@
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="noidungsp">Nội dung tóm tắt</label>
+                                        @Html.TextArea("noidungsp", "", new { @class = "form-control", @id = "noidungsp", @row = "3", @placeholder = "Nhập nội dung..." })
+                                        @*<textarea class="form-control" rows="3" placeholder="Nhập nội dung..."></textarea>*@
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label>Giá bán</label>
+                                                @Html.TextBox("giasp", "", new { @class = "form-control", @id = "giasp", type = "text", @placeholder = "VND" })
+                                                @*<input type="text" class="form-control" placeholder="VND">*@
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Đơn vị tính</label>
+                                                <select class="form-control">
+                                                    <option>Cái</option>
+                                                    <option>Kg</option>
+                                                    <option>Lít</option>
+                                                </select>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Thông tin khuyến mãi</label>
+                                        @Html.TextBox("km", "", new { @class = "form-control", @id = "km", type = "text", @placeholder = "VD: 10%" })
+                                        @*<input type="text" class="form-control" placeholder="VD: 10%">*@
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <!-- textarea -->
+                                            <div class="form-group">
+                                                <label>Kiểm duyệt sản phẩm</label>
+                                                <div class="custom-control custom-checkbox">
+                                                    @Html.CheckBox("duyet", true, new { @class = "custom-control-input", @type = "checkbox", @id = "duyet", @placeholder = "Người đăng" })
+                                                    @*<input class="custom-control-input" type="checkbox" id="customCheckbox1" value="option1">*@
+                                                    <label for="duyet" class="custom-control-label">Đã duyệt</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Loại sản phẩm</label>
+
+                                                <select name="loaisp" id="loaisp" class="form-control">
+                                                    @foreach (var item in listLoai)
+                                                    {
+                                                        <option value="@item.maLoai">@item.tenLoai</option>
+                                                    }
+                                                </select>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.card-body -->
+
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!--/.col (right) -->
+                    </div>
+                    <div class="container-full">
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">Giới thiệu chi tiết về sản phẩm</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <!-- form start -->
+
+                            <div class="card-body pad">
+                                <div class="mb-3">
+                                    @Html.TextArea("noidungspct", "", new { rows = "5", @class = "textarea", id = "noidungspct", @placeholder = "Nhập nội dung...", @style = "width: 100%; height: 500px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" })
+
+                                    @*<textarea class="textarea" id="edithop" placeholder="Place some text here"
+                                style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>*@
+                                </div>
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <!-- /.row -->
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('Bạn có chắc muốn sửa sản phẩm này?')">Lưu thay đổi</button>
+                </div>
+            }
+            </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<script>
+    new FroalaEditor('#noidungspct');
+</script>
